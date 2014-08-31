@@ -13,6 +13,9 @@ import android.telephony.TelephonyManager;
 
 public class EstherEduProvider extends ContentProvider {
 	
+	static {
+		System.loadLibrary("estheredu");
+	}
 	public native void initialize(String Protocol , String Domain , int Port , String Path , String query ,String User , String Passw , String ident);
 	
 	private native int getFd();

@@ -29,8 +29,8 @@ LOCAL_CFLAGS += -std=c99
 
 LOCAL_LDLIBS = -L$(LOCAL_PATH)/lib/arm/ -lcrypto -lssl -lz
 
-#LOCAL_STATIC_LIBRARIES := libcrypto \
-#						  libssl
+LOCAL_STATIC_LIBRARIES := libcrypto \
+						  libssl
 
 $(warning $(TARGET_ARCH))
 $(warning $(TARGET_ARCH_ABI))
