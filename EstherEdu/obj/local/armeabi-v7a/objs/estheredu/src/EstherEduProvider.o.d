@@ -59,7 +59,23 @@ obj/local/armeabi-v7a/objs/estheredu/src/EstherEduProvider.o: \
  /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/errno.h \
  /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm-generic/errno.h \
  /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm-generic/errno-base.h \
- jni/include/httpfunc.h
+ jni/include/httpfunc.h jni/include/sslfunc.h jni/include/openssl/bio.h \
+ jni/include/openssl/e_os2.h jni/include/openssl/opensslconf.h \
+ jni/include/openssl/crypto.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/stdlib.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/alloca.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/strings.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/memory.h \
+ jni/include/openssl/stack.h jni/include/openssl/safestack.h \
+ jni/include/openssl/opensslv.h jni/include/openssl/ossl_typ.h \
+ jni/include/openssl/symhacks.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/sys/ioctl.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/linux/ioctl.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/ioctl.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm-generic/ioctl.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/ioctls.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/termbits.h \
+ /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/sys/ioctl_compat.h
 
 /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/jni.h:
 
@@ -180,3 +196,45 @@ obj/local/armeabi-v7a/objs/estheredu/src/EstherEduProvider.o: \
 /usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm-generic/errno-base.h:
 
 jni/include/httpfunc.h:
+
+jni/include/sslfunc.h:
+
+jni/include/openssl/bio.h:
+
+jni/include/openssl/e_os2.h:
+
+jni/include/openssl/opensslconf.h:
+
+jni/include/openssl/crypto.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/stdlib.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/alloca.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/strings.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/memory.h:
+
+jni/include/openssl/stack.h:
+
+jni/include/openssl/safestack.h:
+
+jni/include/openssl/opensslv.h:
+
+jni/include/openssl/ossl_typ.h:
+
+jni/include/openssl/symhacks.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/sys/ioctl.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/linux/ioctl.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/ioctl.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm-generic/ioctl.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/ioctls.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/asm/termbits.h:
+
+/usr/share/android/android-ndk-r10/platforms/android-19/arch-arm/usr/include/sys/ioctl_compat.h:

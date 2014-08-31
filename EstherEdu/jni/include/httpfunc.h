@@ -41,9 +41,12 @@ int getHttpContentEncoding(EEssl *bio);
 int getHttp100Continue(EEssl *bio);
 
 int getboundary(EEssl *bio,httpmem *mem, char *boundary, int end , int comp );
+int getboundaryHeaderQuery(EEssl *bio,httpmem *mem, char *boundary, char *name , int comp);
+int getboundaryHeaderFile(EEssl *bio,httpmem *mem, char *boundary, char *name , int comp);
 
 httpmem * setChunkSize(int size );
-void freeChunck(httpmem * m);
+
+void freeChunk(httpmem * m);
 int getChunk(EEssl *bio,httpmem *mem, char *addBuffer , int addBufferLen, int comp , int b64);
 
 #endif /* HTTPFUNC_H_ */

@@ -21,8 +21,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with EstherEdu.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <ssl.h>
-#include <bio.h>
+#include <openssl/ssl.h>
+#include <openssl/bio.h>
+#include <sslfunc.h>
+#include <sys/select.h>
 
 #define CA_PATH "/etc/security/cacerts/"
 
@@ -37,23 +39,23 @@ EEssl * initssl(int setssl, char *host, int port){
 	BIO * bio;
 
 	if (setssl){
-		SSL_library_init(void);
+		SSL_library_init();
 		OpenSSL_add_all_algorithms();
 		SSL_load_error_strings();
 		//implementar nomes TLS version >= 1.0
-		ctx = SSL_CTX_NEW(SSLv23_client_method());
+		ctx = SSL_CTX_new(SSLv23_client_method());
 		SSL_CTX_set_options(ctx ,SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-		SSL_CTX_SSL_CTX_load_verify_locations(ctx , NULL , CA_PATH);
-		SSS_CTX_set_mode(ctx , SSL_MODE_AUTO_RETRY);
+		SSL_CTX_load_verify_locations(ctx , NULL , CA_PATH);
+		SSL_CTX_set_mode(ctx , SSL_MODE_AUTO_RETRY);
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER , verify_callback);
 		bio = BIO_new_ssl_connect(ctx);
 		BIO_get_ssl(bio , &ssl);
 		SSL_set_tlsext_host_name(ssl , host);
-	}else bio = BIO_new();
+	}else bio = BIO_new(BIO_s_connect());
 	BIO_set_close(bio ,BIO_CLOSE);
 	BIO_set_nbio(bio ,1);
 	BIO_set_conn_hostname(bio, host);
-	BIO_set_in_port(bio , port);
+	BIO_set_conn_int_port(bio , port);
 	if (BIO_do_connect(bio) <= 1){
 		BIO_free_all(bio);
 		return (BIO *) 0;
@@ -68,13 +70,6 @@ EEssl * initssl(int setssl, char *host, int port){
 
 }
 
-int eewrite(EEssl * bio ,struct msghdr *msg){
-	int len = 0;
-	for (int i = 0 ; i++ ; i < msg->msg_iovlen ){
-		len += BIO_write(bio , msg->msg_iov[i].iov_base ,msg->msg_iov[i].iov_len );
-	}
-	return len;
-}
 int eewriteb(EEssl * bio ,char * buf1 , int len1 , char *buf2 , int len2){
 	int ret = 0;
 	if (BIO_eof(bio)) return -1;
@@ -85,16 +80,17 @@ int eewriteb(EEssl * bio ,char * buf1 , int len1 , char *buf2 , int len2){
 int eeread(EEssl * bio , char **buf ,int *len, int timeout){
 	struct timeval *t;
     fd_set rfds;
+    int rtc;
 
     FD_ZERO(&rfds);
     FD_SET(BIO_get_fd(bio, NULL), &rfds);
     *len = 0;
     if (timeout = -1) t = 0 ;
     else{
-    	t = calloc(1 , sizeof(struc timeval));
+    	t = calloc(1 , sizeof(struct timeval));
     	t->tv_sec = timeout;
     }
-    *buf = NULL:
+    *buf = NULL;
     while(1){
     	rtc = select(1, &rfds, NULL, NULL, t);
     	if (!rtc){
@@ -104,7 +100,7 @@ int eeread(EEssl * bio , char **buf ,int *len, int timeout){
     	int pend = BIO_pending(bio);
     	if (pend > 0) {
     		*buf = realloc(*buf , (*len) + pend);
-    		BIO_read(bio , (*buf) + (*len) , pen);
+    		BIO_read(bio , (*buf) + (*len) , pend);
     		(*len) *= pend;
     	}
     	if (BIO_eof(bio)){
@@ -112,7 +108,7 @@ int eeread(EEssl * bio , char **buf ,int *len, int timeout){
     		BIO_free_all(bio);
     		return -1;
     	}
-    	if (if (timeout != -1)){
+    	if (timeout != -1){
     		t->tv_sec =  0;
     		t->tv_usec = 0;
     	}

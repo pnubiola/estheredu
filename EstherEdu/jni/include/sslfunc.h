@@ -6,7 +6,7 @@
  */
 
 
- This file is part of EstherEdu.
+/* This file is part of EstherEdu.
 
     EstherEdu is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@
 #ifndef SSLFUNC_H_
 #define SSLFUNC_H_
 
-typedef ssl EEssl;
+#include <openssl/bio.h>
+typedef BIO EEssl;
 
 EEssl * initssl(int setssl, char *host, int port);
-int eewrite(EEssl * bio ,struct msghdr *msg);
 int eeread(EEssl * bio , char **buf ,int *len, int timeout);
 int eewriteb(EEssl * bio ,char * buf1 , int len1 , char *buf2 , int len2);
-void close(EEssl * bio);
+void eeclose(EEssl * bio);
 
 #endif /* SSLFUNC_H_ */

@@ -22,6 +22,7 @@
     along with EstherEdu.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <jni.h>
 #include <pthread.h>
 #include <string.h>
@@ -35,7 +36,6 @@
 #include <time.h>
 #include <httpfunc.h>
 #include <sys/ioctl.h>
-
 
 #define BUFFERSIZE 0x4000
 
@@ -125,10 +125,9 @@ void freestaticvar(photoData * p){
 int initHttp(photoData *p){
 	char *crln = "\r\n";
 	int len , rtc;
-	char *buf
-	memset(&msg,0,sizeof(struct msghdr));
+	char *buf;
 
-	sprintf(boundary,"$&_%.7lx",getyearseconds());
+	sprintf(p->boundary,"$&_%.7lx",getyearseconds());
 
 	if (getHttpPostHeader(p->bio,p->cPath) == -1) return -1;
 	if (getHttpConnectionHeader(p->bio , 1) == -1) return -1 ;
@@ -136,20 +135,20 @@ int initHttp(photoData *p){
 	if (getHttpTransferEncodingHeader(p->bio,1) == -1) return -1;
 	if (getHttpAceptHeader(p->bio) == -1) return -1;
 	if (getHttpAceptCharsetHeader(p->bio) == -1) return -1;
-	if (getHttpHost(bio,p->cDomain, p->iPort) == -1) return -1;
+	if (getHttpHost(p->bio,p->cDomain, p->iPort) == -1) return -1;
 	if (getHttpContentType(p->bio,p->boundary) == -1) return -1;
 	if (getHttpContentEncoding(p->bio) == -1) return -1;
-	if (getHttp100Continue(bio,) == -1) return -1;
+	if (getHttp100Continue(p->bio) == -1) return -1;
 	if (eewriteb(p->bio , crln , strlen(crln) , NULL ,0) == -1) return -1;
 
-	rtc = eeread(bio , &buf , &len, 5);
+	rtc = eeread(p->bio , &buf , &len, 5);
 	if (rtc == 0){
 		if ( len == 0) return 0;
 		char tk[2] = "-" , *pos;
 		//response format  HTTP-Version SP Status-Code SP Reason-Phrase CRLF any digits
 		pos = strtok(buf , tk);
-		pos = strtok(null, tk);
-		if (!strcmp(pos , "100"){
+		pos = strtok(NULL, tk);
+		if (!strcmp(pos , "100")){
 			free(buf);
 			return 0;
 		}
@@ -162,8 +161,8 @@ int initHttp(photoData *p){
 void *readloop(void * dummy){
     fd_set rfds;
     int rtc , init , prot ;
-    static init = 0 , prot = 0;
-    char * buf[BUFFERSIZE];
+    char buf[BUFFERSIZE];
+    httpmem *mem;
     photoData *p = (photoData *) dummy;
 
     if (!strcmp(p->cProtocol, "http")) prot = 1;
@@ -191,15 +190,44 @@ void *readloop(void * dummy){
     			}
     			p->bopen = 1;
     		}
-    		if (prot > 0 && prot < 3)
+    		if (prot > 0 && prot < 3){
     			if (initHttp(p)) {
     	    		freestaticvar(p);
     			};
+    			mem = setChunkSize(16384);
+    			if (p->cQuery && strlen(p->cQuery)){
+
+					if (getboundaryHeaderQuery(p->bio,mem, p->boundary, p->cQuery , 1) < 0) {
+						freestaticvar(p);
+						freeChunk(mem);
+						return NULL;
+					}
+    			}
+				if (getboundaryHeaderFile(p->bio,mem, p->boundary, p->cIdent ,1 ) < 0) {
+					freestaticvar(p);
+					freeChunk(mem);
+					return NULL;
+				}
     		}
     		init = 1;
     	}
+    	if (!(rtc = read(p->mypipe[0] , buf, BUFFERSIZE))){
+    		if (getboundary(p->bio,mem, p->boundary, 1 , 0 ) < 0){
+				freestaticvar(p);
+				freeChunk(mem);
+				return NULL;
 
-
+    		}
+    		while((rtc = getChunk(p->bio,mem, NULL , 0 , 1 , 0)) > 0) ;
+			freestaticvar(p);
+			freeChunk(mem);
+			return NULL;
+    	}
+    	if ((rtc = getChunk(p->bio,mem, buf , rtc , 1 , 1)) < 0){
+			freestaticvar(p);
+			freeChunk(mem);
+			return NULL;
+    	}
     }
 
     return NULL;
@@ -216,7 +244,7 @@ JNIEXPORT jint JNICALL cat_nubiola_estheredu_getFd(JNIEnv *env, jobject obj){
 
 	IOException = (*env)->FindClass(env ,"java.io.IOException");
 
-	if (iPort < 1) {
+	if (tmp->iPort < 1) {
 		if (!strcmp(tmp->cProtocol , "http")) tmp->iPort = 80;
 		else if (!strcmp(tmp->cProtocol , "https")) tmp->iPort = 443;
 		else if (!strcmp(tmp->cProtocol , "ftp")) tmp->iPort = 21;

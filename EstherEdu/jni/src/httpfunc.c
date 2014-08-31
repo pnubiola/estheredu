@@ -67,11 +67,11 @@ int getHttpDateHeader(EEssl *bio){
 	char *wkday[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 	char *text = "Date: %s, %.2d %s %.4d %.2d;&.2d%.2d GMT\r\n";
 	char *ret = (char *) malloc(35);
-	if (clock_gettime((clockid_t) CLOCK_REALTIME , &t)) return NULL;
+	if (clock_gettime((clockid_t) CLOCK_REALTIME , &t)) return -1;
 	tc = gmtime( &(t.tv_sec));
 	sprintf(ret , text, wkday[tc->tm_wday] , tc->tm_mday, mon[tc->tm_mon],tc->tm_year,tc->tm_hour, tc->tm_min , tc->tm_sec );
 	rtc = eewriteb(bio , ret , strlen(ret) , NULL , 0);
-	free(ret)
+	free(ret);
 	return rtc;
 }
 
@@ -170,6 +170,7 @@ int getHttpHost(EEssl *bio,char *domain, int port){
 }
 
 int getHttpProxyAuth(EEssl * bio,char *user , char *password ) {
+	int rtc;
 	char * up ;
 	char *upo = (char *) malloc(strlen(user) + strlen(password) + 2);
 
@@ -186,6 +187,7 @@ int getHttpProxyAuth(EEssl * bio,char *user , char *password ) {
 }
 
 int getHttpContentType(EEssl *bio, char* boundary){
+	int rtc;
 	char *text="Content-Type: multipart/form-data; boundary=%s\r\n";
 	char *ret = (char *) malloc(strlen(text) + strlen(boundary));
 	sprintf(ret ,text,boundary);
@@ -193,10 +195,38 @@ int getHttpContentType(EEssl *bio, char* boundary){
 	free(ret);
 	return rtc;
 }
+
 int getboundary(EEssl *bio,httpmem *mem, char *boundary, int end , int comp ){
-	char *buff = char* malloc(strlen(boundary + 5 + (end) ? 2 : 0));
+	char *buf = (char*) malloc(strlen(boundary) + 5 + (end ? 2 : 0));
 	sprintf(buf ,"--%s%s\r\n",boundary , end ? "--" : "");
-	int rtc = getChunk(bio,mem, buf , stgrlen(buf), comp , 0);
+	int rtc = getChunk(bio,mem, buf , strlen(buf), comp , 0);
+	free(buf);
+	return rtc;
+}
+
+int getboundaryHeaderQuery(EEssl *bio,httpmem *mem, char *boundary, char *name , int comp){
+	char *text = "Content-disposition: form-data; name=\"queryString\"\r\n\r\n%s\r\n";
+
+	if (getboundary(bio,mem, boundary, 0 , comp ) < 0) return -1;
+
+	char *buf = (char *) malloc(strlen(text) + strlen(name));
+	sprintf(buf ,text,name);
+	int rtc = getChunk(bio,mem, buf , strlen(buf), comp , 0);
+	free(buf);
+	return rtc;
+}
+
+int getboundaryHeaderFile(EEssl *bio,httpmem *mem, char *boundary, char *name , int comp){
+	char *text =
+			"Content-disposition: form-data;  name=\"datafile\"; filename=\"%s.jpg\"\r\n"
+			"Content-Type: image/jpg\r\n"
+			"Content-Transfer-Encoding: base64\r\n\r\n";
+
+	if (getboundary(bio,mem, boundary, 0 , comp ) < 0) return -1;
+
+	char *buf = (char *) malloc(strlen(text) + strlen(name));
+	sprintf(buf ,text,name);
+	int rtc = getChunk(bio,mem, buf , strlen(buf), comp , 0);
 	free(buf);
 	return rtc;
 }
@@ -215,9 +245,9 @@ httpmem * setChunkSize(int size){
 	ret->chunkSize = size;
 	ret->chunkBuffer = (char *) malloc(size);
 	ret->chunkBufferSize = size;
-	return ret
+	return ret;
 }
-void freeChunck(httpmem * m){
+void freeChunk(httpmem * m){
 	free(m);
 }
 #define windowBits 15
@@ -254,7 +284,7 @@ static int strm_next (z_stream * strm , char **ret , int end , int chunkSize){
 int getChunk(EEssl *bio,httpmem *mem, char *addBuffer , int addBufferLen, int comp , int b64){
 	int ret = -1 , lenb ;
 	static int isb64 = 0, compinit = 0;
-	static BIO *bio[2];
+	static BIO *bio64[2];
 	static z_stream strm;
 	char * buff, *final;
 
@@ -264,16 +294,16 @@ int getChunk(EEssl *bio,httpmem *mem, char *addBuffer , int addBufferLen, int co
 		lenb = addBufferLen;
 		if (b64 && !isb64){
 			//init b64
-			base64encodeStart(bio);
+			base64encodeStart(bio64);
 			isb64 = 1;
 		}
 		if (isb64 && b64){
 			// must be convert to base64
-			base64encodeWrite(bio ,addBuffer , addBufferLen , &buff);
+			base64encodeWrite(bio64 ,addBuffer , addBufferLen , &buff);
 			lenb = strlen(buff);
 		}else if(isb64){
 			//end base 64
-			base64encodeEnd(bio ,&buff);
+			base64encodeEnd(bio64 ,&buff);
 			lenb = strlen(buff);
 			if(addBufferLen){
 				buff = (char *) realloc(buff , lenb + addBufferLen);
@@ -316,7 +346,7 @@ int getChunk(EEssl *bio,httpmem *mem, char *addBuffer , int addBufferLen, int co
 			isb64 = b64;
 		}
 	} else if(compinit){
-		lenb = strm_next (&strm , &final , 1);
+		lenb = strm_next (&strm , &final , 1 , mem->chunkSize);
 		if (lenb < 0){
 			return -1;
 		}
@@ -329,21 +359,17 @@ int getChunk(EEssl *bio,httpmem *mem, char *addBuffer , int addBufferLen, int co
 	char londes[15];
 	if (!addBufferLen || (mem->chunkInPos - mem->chunkOutPos) < mem->chunkSize){
 		ret = (mem->chunkInPos - mem->chunkOutPos) < mem->chunkSize ? mem->chunkInPos - mem->chunkOutPos : mem->chunkSize;
-		sprintf(londes,"%z\r\n",ret);
+		sprintf(londes,"%x\r\n",ret);
 		eewriteb(bio , londes , strlen(londes), mem->chunkBuffer , ret );
 		if (ret) {
-			memmove(mem->chunkBuffer , mem->chunBuffer + ret ,  mem->chunkBufferSize - ret );
-			l = (int) ceil((mem->chunkBufferSize - ret) / mem->chunkSize) * mem->chunkSize;
-			if (l < mem-chunkVufferSize){
-				mem->chunkBufer = (char *) realloc(mem->chunkBufer , l);
+			memmove(mem->chunkBuffer , mem->chunkBuffer + ret ,  mem->chunkBufferSize - ret );
+			int l = (int) ceil((mem->chunkBufferSize - ret) / mem->chunkSize) * mem->chunkSize;
+			if (l < mem->chunkBufferSize){
+				mem->chunkBuffer = (char *) realloc(mem->chunkBuffer , l);
 			}
 			mem->chunkBufferSize -= ret;
 			mem->chunkInPos -= ret;
 		}else{
-			dest = NULL;
-			free(chunkBuffer);
-			free(mem)
-			eeclose(bio);
 		}
 		return ret;
 	}
