@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">EstherEdu</string>
+    <string name="protocol">Protocollo</string>
+    <string name="domain">Nome de dominio</string>
+	<string name="path">Percoso</string>
+	<string name="port">Porta</string>    
+	<string name="username">nome de usuario</string>
+	<string name="password">Password</string>	
+	<string name="takePhoto">Scattare foto</string>
+	<string name="captureQr">Configurazione con un QR</string>    
+</resources>
