@@ -17,17 +17,30 @@
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
+
+LOCAL_MODULE := libcrypto
+LOCAL_SRC_FILES := lib/arm/libcrypto.a
+
 include $(PREBUILD_STATIC_LIBRARIES)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libssl
+LOCAL_SRC_FILES := lib/arm/libssl.a
+
+include $(PREBUILD_STATIC_LIBRARIES)
+
+include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := src/httpfunc.c \
 				   src/sslfunc.c \
-				   src/EstherEduProvider.c
+				   src/EstherEduProvider.c 
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 
 LOCAL_CFLAGS += -std=c99
 
-LOCAL_LDLIBS = -L$(LOCAL_PATH)/lib/arm/ -lcrypto -lssl -lz
+LOCAL_LDLIBS =  -lz
 
 LOCAL_STATIC_LIBRARIES := libcrypto \
 						  libssl

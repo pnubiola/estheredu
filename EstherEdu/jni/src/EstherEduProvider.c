@@ -1,5 +1,5 @@
 /*
- * cat_nubiola_estheredu_EstherEduProvider.c
+ * EstherEduProvider.c
  *
  *  Created on: 11/08/2014
  *      Author: Pere Nubiola

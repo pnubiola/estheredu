@@ -31,6 +31,7 @@
 	        android:entries="@array/protocolsList"
 	        android:paddingLeft="@dimen/border"
 	        android:paddingRight="@dimen/border"
+	        android:textColor="#0000ff"
 	     />
 	</LinearLayout>
     <TextView
@@ -56,9 +57,9 @@
 		    android:layout_height="30dp"
 		    android:background="@android:color/white"
 		    android:textSize="20sp"
-		    android:inputType="textUri" >
-
-		</EditText>
+		    android:inputType="textUri" 
+		    android:textColor="#0000ff"
+		/>
 
     </LinearLayout>
     <TextView
@@ -84,9 +85,9 @@
 		    android:layout_height="30dp"
 		    android:background="@android:color/white"
 		    android:textSize="20sp"
-		    android:inputType="number" >
-
-		</EditText>
+		    android:inputType="number"
+		    android:textColor="#0000ff"
+		/>
 
     </LinearLayout>
     
@@ -113,8 +114,9 @@
 		    android:layout_height="30dp"
 		    android:background="@android:color/white"
 		    android:textSize="20sp"
-		    android:inputType="textUri" >
-		</EditText>
+		    android:inputType="textUri"
+		    android:textColor="#0000ff"
+		/>
 
     </LinearLayout>
     <TextView
@@ -140,8 +142,9 @@
 		    android:layout_height="30dp"
 		    android:background="@android:color/white"
 		    android:textSize="20sp"
-		    android:inputType="text" >
-		</EditText>
+		    android:inputType="text"
+		    android:textColor="#0000ff"
+		/>
 
     </LinearLayout>
 	
@@ -168,8 +171,9 @@
 		    android:layout_height="30dp"
 		    android:background="@android:color/white"
 		    android:textSize="20sp"
-		    android:inputType="textUri" >
-		</EditText>
+		    android:inputType="textUri"
+		    android:textColor="#0000ff"
+		/>
 
     </LinearLayout>
     
@@ -196,8 +200,9 @@
 		    android:layout_height="30dp"
 		    android:background="@android:color/white"
 		    android:textSize="20sp"
-		    android:inputType="textPassword" >
-		</EditText>
+		    android:inputType="textPassword"
+		    android:textColor="#0000ff"
+		/>
 
     </LinearLayout>
 		

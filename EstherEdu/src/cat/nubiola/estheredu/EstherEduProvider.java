@@ -1,3 +1,27 @@
+/*
+ * EstherEduProvider.java
+ *
+ *  Created on: 11/08/2014
+ *      Author: Pere Nubiola
+ */
+
+
+/* This file is part of EstherEdu.
+
+    EstherEdu is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    EstherEdu is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with EstherEdu.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package cat.nubiola.estheredu;
 
 import java.io.FileNotFoundException;
@@ -10,12 +34,14 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class EstherEduProvider extends ContentProvider {
 	
 	static {
 		System.loadLibrary("estheredu");
 	}
+	private static final String TAG = "EstherEduPovider";
 	public native void initialize(String Protocol , String Domain , int Port , String Path , String query ,String User , String Passw , String ident);
 	
 	private native int getFd();
@@ -42,24 +68,32 @@ public class EstherEduProvider extends ContentProvider {
 	public int fd;
 	@Override
 	public boolean onCreate() {
+		Log.v(TAG , "onCreate: init");
 		initialize(protocol , domain , port , path , query , user.isEmpty()? "" : user , passw.isEmpty()? "" : passw , unicIdentifier());
 		fd = getFd();
 		getContext().getContentResolver().notifyChange(CONTENT_URI, null);
+		Log.v(TAG , "onCreate: end fd=" + fd);
 		return true;
 	}
 
 	@Override
 	public String getType(Uri uri) {
 		String path = uri.toString();
+		Log.v(TAG , "getType: init uri=" + uri);
 		for (String ext : MIME_TYPES.keySet()){
-			if(path.endsWith(ext)) return (MIME_TYPES.get(ext));
+			if(path.endsWith(ext)){
+				Log.v(TAG , "getType: end ext=" + ext);
+				return (MIME_TYPES.get(ext));
+			}
 		}
+		Log.v(TAG , "getType: end ext=unknow");
 		return null;
 	}
 
 	@Override
 	public ParcelFileDescriptor openFile(Uri uri, String mode)
 			throws FileNotFoundException {
+		Log.v(TAG , "openFile: called");
 		return ParcelFileDescriptor.adoptFd(fd);
 	}
 
@@ -85,6 +119,7 @@ public class EstherEduProvider extends ContentProvider {
 		throw new RuntimeException("Operation npot Suported");
 	}
 	String unicIdentifier(){
+		Log.v(TAG, "unicIdentifier: init");
 		TelephonyManager tMgr =(TelephonyManager)getContext().getSystemService(Context.TELEPHONY_SERVICE);
 		String t = null;
 		String tp = "LN";
@@ -98,7 +133,11 @@ public class EstherEduProvider extends ContentProvider {
 				}
 			}
 		}
-		if (t != null &&  t.trim().length() != 0) return (tp + t);
+		if (t != null &&  t.trim().length() != 0) {
+			Log.v(TAG, "unicIdentifier: end return " + tp + t);
+			return (tp + t);
+		}
+		Log.v(TAG, "unicIdentifier: end return null");
 		return null;
 
 	}
