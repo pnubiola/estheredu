@@ -18,17 +18,21 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libcrypto
-LOCAL_SRC_FILES := lib/arm/libcrypto.a
+LOCAL_MODULE := crypto
+LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libcrypto.so
+$(warning $(LOCAL_SRC_FILES))
+$(warning $(LOCAL_PATH))
 
-include $(PREBUILD_STATIC_LIBRARIES)
+include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libssl
-LOCAL_SRC_FILES := lib/arm/libssl.a
+LOCAL_MODULE := ssl
+LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libssl.so
+$(warning $(LOCAL_SRC_FILES))
 
-include $(PREBUILD_STATIC_LIBRARIES)
+
+include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -40,15 +44,15 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 
 LOCAL_CFLAGS += -std=c99
 
-LOCAL_LDLIBS =  -lz
+LOCAL_LDLIBS = -lz 
 
-LOCAL_STATIC_LIBRARIES := libcrypto \
-						  libssl
+LOCAL_SHARED_LIBRARIES := crypto \
+						  ssl
 
 $(warning $(TARGET_ARCH))
 $(warning $(TARGET_ARCH_ABI))
 						  
-$(warning $(LOCAL_STATIC_LIBRARIES))
+$(warning $(LOCAL_SHARED_LIBRARIES))
 						  
 LOCAL_MODULE := estheredu
 
