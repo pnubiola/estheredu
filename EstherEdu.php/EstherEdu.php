@@ -98,7 +98,7 @@ function firtsfile($dir){
   echo "local path: {$savedir}<br/>"; 
   $p = strpos($by , "\r\n--{$boundary}");
   if ($p === false) {
-	echo "<H1>error 400 {$boundary} boundary not foun</body></html>";
+	echo "<H1>error 400 {$boundary} boundary not found</body></html>";
 	return;
   }
   $b = 0 ;
@@ -113,15 +113,15 @@ function firtsfile($dir){
       $mz ++;
       if ($mz > 5) break;
       if (trim(substr($by,$p, $p2 -$p)) == false) {
-	$p = $p2 + 2;
-	break;
+		$p = $p2 + 2;
+		break;
       }
       $p1 = strpos($by , ":" , $p);
       if ($p1 === false || trim(substr($by , $p , $p1 - $p)) == false) {
-	$p2 = substr($by ,$p , $p2- $p1);
-	echo "<H1>error 400 {$p2}</body></html>";
-	http_response_code(400);
-	return;
+		$p2 = substr($by ,$p , $p2- $p1);
+		echo "<H1>error 400 {$p2}</body></html>";
+		http_response_code(400);
+		return;
       }
       $ha[strtolower(trim(substr($by , $p , $p1 - $p)))] = trim(substr($by , $p1 + 1 , $p2 - $p1 - 1));
       $p = $p2 + 2;
@@ -142,14 +142,14 @@ function firtsfile($dir){
     $fi = array();
     foreach($tmpa as $w){
       If (strpos($w , "=") !== false) {
-	$b1 = explode('=',$w);
-	$fi[trim($b1[0])] = trim($b1[1] , "\"");
+		$b1 = explode('=',$w);
+		$fi[trim($b1[0])] = trim($b1[1] , "\"");
       }
     }
     if (!array_key_exists('content-type',$ha) && !array_key_exists('name', $fi) && $fi['name'] !== 'queryString' ){
-	echo "<H1>error 400 {$ha['content-disposition']} not allowed</body></html>";
-	http_response_code(400);
-	return;      
+		echo "<H1>error 400 {$ha['content-disposition']} not allowed</body></html>";
+		http_response_code(400);
+		return;      
     }
     error_log("Esther edu: array maked");
     print "<pre>" ;
@@ -161,7 +161,7 @@ function firtsfile($dir){
     $parcialbody = substr($by , $p , $p1 -$p);
     if (array_key_exists('name', $fi) && $fi['name'] == 'queryString'){
       if (is_dir($parcialbody) === false){
-	mkdir($parcialbody , 0777,true);
+		mkdir($parcialbody , 0777,true);
       }
       $savedir = realpath($parcialbody);
       $prename = prename($savedir);
@@ -171,14 +171,15 @@ function firtsfile($dir){
       case 'image/jpeg':
       case 'image/png':
       case 'image/svg+xml':
-	if (array_key_exists('content-transfer-encoding' , $ha ) && strtolower($ha['content-transfer-encoding']) == 'base64'){
-	  $parcialbody = base64_decode($parcialbody);
-	}
-	if (substr($savedir , -1) != DIRECTORY_SEPARATOR) $savedir .= DIRECTORY_SEPARATOR;
-	$fil = $savedir . $prename . $fi['filename'];
-	file_puts_content($fil ,$parcialbody , LOCK_EX); 
-	$fil = $savedir . 'filelist.data';
-	file_puts_content($fil , "{$prename}{$fi['filename']}\n\r" ,LOCK_EX | FILE_APPEND );
+      	if (array_key_exists('content-transfer-encoding' , $ha ) && 
+      		strtolower($ha['content-transfer-encoding']) == 'base64'){
+	  		$parcialbody = base64_decode($parcialbody);
+		}
+		if (substr($savedir , -1) != DIRECTORY_SEPARATOR) $savedir .= DIRECTORY_SEPARATOR;
+		$fil = $savedir . $prename . $fi['filename'];
+		file_puts_content($fil ,$parcialbody , LOCK_EX); 
+		$fil = $savedir . 'filelist.data';
+		file_puts_content($fil , "{$prename}{$fi['filename']}\n\r" ,LOCK_EX | FILE_APPEND );
     }
     if (substr($by , $p1 + 4 + strlen($boundary) ,2) == '--') break;
     $p = $p1;
